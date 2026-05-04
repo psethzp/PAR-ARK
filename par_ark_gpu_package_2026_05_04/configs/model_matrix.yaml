@@ -1,0 +1,38 @@
+models:
+  smoke:
+    name: Qwen/Qwen3-8B
+    placement: 1x_L40
+    dtype: bfloat16
+    max_model_len: 16384
+    vllm_args: "--max-num-seqs 1 --gpu-memory-utilization 0.82"
+    role: smoke, parser debugging, optional student
+  ablation:
+    name: Qwen/Qwen3-14B
+    placement: 1x_L40
+    dtype: bfloat16
+    max_model_len: 16384
+    vllm_args: "--max-num-seqs 1 --gpu-memory-utilization 0.86"
+    role: main validation ablation backbone
+  final_teacher:
+    name: Qwen/Qwen3-30B-A3B-Instruct-2507
+    placement: 2x_L40_tensor_parallel
+    dtype: bfloat16
+    max_model_len: 32768
+    vllm_args: "--tensor-parallel-size 2 --max-num-seqs 1 --gpu-memory-utilization 0.90"
+    role: strongest local/open-weight controller
+  reranker_quality:
+    name: Qwen/Qwen3-Reranker-8B
+    placement: 1x_L40_after_stopping_controller
+    dtype: bfloat16
+    max_seq_len: 32768
+    role: optional offline candidate reranker
+  reranker_fallback:
+    name: BAAI/bge-reranker-v2-m3
+    placement: 1x_L40_or_cpu
+    dtype: fp16
+    role: fast fallback reranker
+policy:
+  do_not_load_controller_and_reranker_together: true
+  local_qwen_agents_default_sequential: true
+  final_quality_prefers_bf16_not_quantized: true
+  quantization_allowed_for_efficiency_ablation: true

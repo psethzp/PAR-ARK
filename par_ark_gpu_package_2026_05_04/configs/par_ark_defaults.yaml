@@ -1,0 +1,19 @@
+par_ark:
+  max_steps: 16
+  number_of_agents: 1
+  sequential_agents: true
+  max_global_searches: 6
+  max_neighborhood_searches: 8
+  max_repeated_tool_calls: 1
+  max_observation_chars: 6000
+  max_answers: 20
+  trace_hints: true
+  profile_conditioning: true
+  cache_tool_calls: true
+  stop_when_answers_at_least: 10
+  search_mode: bm25
+validation_grid:
+  max_steps: [12, 16]
+  max_global_searches: [4, 6]
+  max_neighborhood_searches: [6, 8]
+  variants: [ark_local, profile, trace, full]
