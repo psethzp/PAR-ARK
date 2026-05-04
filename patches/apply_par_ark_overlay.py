@@ -320,10 +320,11 @@ def main() -> None:
 
     write(root / "par_main.py", r'''
         from __future__ import annotations
-        import os, time
+        import os, time, json
         from argparse import ArgumentParser
         from pathlib import Path
         from concurrent.futures import ThreadPoolExecutor
+        from tqdm import tqdm
         from src.core.logger import logger
         from utils import GraphExplorerConfig, iterate_qas, load_graph, load_model, save_log
         from src.agents.graph_explorer.graph_explorer import GraphExplorerAgent
@@ -337,6 +338,19 @@ def main() -> None:
             d = Path('data/experiments') / args.graph_name / exp / args.split
             d.mkdir(parents=True, exist_ok=True)
             return d
+
+        def write_progress(outdir: Path, event: dict):
+            event = dict(event)
+            event['updated_at'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            (outdir / 'latest_progress.json').write_text(json.dumps(event, indent=2))
+            with open(outdir / 'progress.jsonl', 'a') as f:
+                f.write(json.dumps(event) + '\n')
+
+        def completed_log_count(outdir: Path, expected_ids: set[str] | None = None) -> int:
+            if expected_ids is not None:
+                return sum(1 for qid in expected_ids if (outdir / f'{qid}.json').exists())
+            skip = {'latest_progress.json', 'metrics_summary.json', 'config.yaml'}
+            return sum(1 for p in outdir.glob('*.json') if p.name not in skip)
 
         def make_agent(graph, model, args):
             prompt_file = 'prompts/system_prompt.md' if args.par_mode == 'off' else 'prompts/system_prompt_par_ark.md'
@@ -404,23 +418,55 @@ def main() -> None:
             outdir = result_dir(args)
             logger.info(f'Results saved to {outdir}')
             errors = 0
-            for question_id, question, answer_indices in iterate_qas(args.graph_name, args.split, limit=args.limit):
+            qas = iterate_qas(args.graph_name, args.split, limit=args.limit)
+            total = len(qas)
+            expected_ids = {str(question_id) for question_id, _, _ in qas}
+            completed_at_start = completed_log_count(outdir, expected_ids)
+            write_progress(outdir, {'status': 'running', 'graph': args.graph_name, 'split': args.split,
+                                    'par_mode': args.par_mode, 'run_tag': args.run_tag, 'total': total,
+                                    'completed': completed_at_start, 'errors': errors,
+                                    'message': 'run started or resumed'})
+            pbar = tqdm(qas, total=total, initial=0, desc=f"{args.graph_name}:{args.par_mode}:{args.run_tag}", dynamic_ncols=True)
+            for question_id, question, answer_indices in pbar:
                 out_file = outdir / f'{question_id}.json'
                 if out_file.exists():
+                    pbar.set_postfix_str(f"skip existing {question_id}")
                     logger.info(f'Skipping {question_id}; exists')
                     continue
                 t0 = time.time()
                 try:
+                    write_progress(outdir, {'status': 'running', 'graph': args.graph_name, 'split': args.split,
+                                            'par_mode': args.par_mode, 'run_tag': args.run_tag, 'total': total,
+                                            'completed': completed_log_count(outdir, expected_ids), 'errors': errors,
+                                            'current_question_id': str(question_id),
+                                            'message': 'processing question'})
                     trajectories = run_agents(graph, model, args, question)
                     save_log({'question': question, 'answer_indices': answer_indices, 'trajectories': trajectories,
                               'time_taken': time.time() - t0, 'par_mode': args.par_mode, 'run_tag': args.run_tag}, outdir, question_id)
+                    completed = completed_log_count(outdir, expected_ids)
+                    write_progress(outdir, {'status': 'running', 'graph': args.graph_name, 'split': args.split,
+                                            'par_mode': args.par_mode, 'run_tag': args.run_tag, 'total': total,
+                                            'completed': completed, 'errors': errors,
+                                            'current_question_id': str(question_id),
+                                            'last_question_seconds': round(time.time() - t0, 3),
+                                            'message': 'question completed'})
+                    pbar.set_postfix(completed=completed, errors=errors)
                     logger.info(f'Processed {question_id}')
                 except Exception as e:
                     logger.error(f'Error processing {question_id}: {e}')
                     errors += 1
+                    write_progress(outdir, {'status': 'error_retrying', 'graph': args.graph_name, 'split': args.split,
+                                            'par_mode': args.par_mode, 'run_tag': args.run_tag, 'total': total,
+                                            'completed': completed_log_count(outdir, expected_ids), 'errors': errors,
+                                            'current_question_id': str(question_id), 'error': repr(e),
+                                            'message': 'question failed; sleeping before next item'})
                     time.sleep(3)
                     if errors > 50:
                         raise
+            write_progress(outdir, {'status': 'completed', 'graph': args.graph_name, 'split': args.split,
+                                    'par_mode': args.par_mode, 'run_tag': args.run_tag, 'total': total,
+                                    'completed': completed_log_count(outdir, expected_ids), 'errors': errors,
+                                    'message': 'run complete'})
             logger.info('PAR-ARK run complete')
         if __name__ == '__main__': main()
     ''')
