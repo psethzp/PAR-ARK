@@ -498,6 +498,8 @@ def main() -> None:
         def load_metrics_df(logs: Path, max_agents: int | None):
             rows = []
             for jf in sorted(logs.glob('*.json')):
+                if jf.name in {'latest_progress.json', 'metrics_summary.json'}:
+                    continue
                 d = safe_open_json(jf)
                 if d is None: continue
                 trajs = d.get('trajectories', [])
