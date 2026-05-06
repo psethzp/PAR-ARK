@@ -337,3 +337,79 @@ B2 takeaway: the 30B pilot repeated the Stage A pattern. `off` beat `full` on ev
 - 2026-05-05T22:18:27Z [09_serve_qwen3_30b_a3b_tp2] checkpoint: completed successfully
 - 2026-05-05T22:18:27Z [06_stop_vllm] checkpoint: vLLM stop attempted
 - 2026-05-05T22:18:27Z [06_stop_vllm] SUCCEEDED: vLLM stop attempted
+- 2026-05-05T22:48:20Z [09_serve_qwen3_30b_a3b_tp2] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/09_serve_qwen3_30b_a3b_tp2.detached.log
+- 2026-05-05T22:48:20Z [09_serve_qwen3_30b_a3b_tp2] DETACHED: pid=2926006 log=/home/ubuntu/par_ark_workspace/run_state/logs/09_serve_qwen3_30b_a3b_tp2.detached.log
+- 2026-05-05T22:48:20Z [09_serve_qwen3_30b_a3b_tp2] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/09_serve_qwen3_30b_a3b_tp2.log
+- 2026-05-05T22:48:20Z [09_serve_qwen3_30b_a3b_tp2] RUNNING: starting vLLM Qwen3-30B-A3B on GPUs 1,2
+- 2026-05-05T22:48:20Z [disk] WORKDIR usage 130GB within 700GB budget
+- 2026-05-05T22:48:20Z [09_serve_qwen3_30b_a3b_tp2] checkpoint: launching TP2 vLLM on CUDA_VISIBLE_DEVICES=1,2
+- 2026-05-05T22:50:16Z [18_run_stage_e_30b_subset] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset.detached.log
+- 2026-05-05T22:50:16Z [18_run_stage_e_30b_subset] DETACHED: pid=2926742 log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset.detached.log
+- 2026-05-05T22:50:16Z [18_run_stage_e_30b_subset] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset.log
+- 2026-05-05T22:51:45Z [09_serve_qwen3_30b_a3b_tp2] HEALTHY: /v1/models returned Qwen/Qwen3-30B-A3B-Instruct-2507 with max_model_len=32768; GPUs 1,2 each using about 41673 MiB.
+- 2026-05-05T22:51:45Z [18_run_stage_e_30b_subset] STABILITY CHECK: Stage E active in graph=prime mode=off; latest_progress.json reports completed=8/300, errors=0, current_question_id=6641.
+- 2026-05-05T22:55:00Z [18_run_stage_e_30b_subset] STABILITY CHECK: after roughly 4.5 minutes, graph=prime mode=off reports completed=25/300, errors=0, latest_progress updated_at=2026-05-05T22:54:54Z. GPUs 1,2 are both active at 100% util and about 41729 MiB used. No crash/kill/OOM signal observed during the stability window; tqdm is live in /home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset.log.
+- 2026-05-05T23:03:36Z [4gpu_tp2] USER AUTHORIZED: kill three idle GPU0 PedagogicalRLTutor Python workers and prepare two TP2 replica execution.
+- 2026-05-05T23:03:47Z [4gpu_tp2] ACTION: sent SIGTERM to GPU0 worker pids 2609872,2610741,2611714; post-kill GPU compute app snapshot recorded in shell output.
+- 2026-05-05T23:03:55Z [20_serve_qwen3_30b_a3b_tp2_replica_b] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/20_serve_qwen3_30b_a3b_tp2_replica_b.detached.log
+- 2026-05-05T23:03:55Z [20_serve_qwen3_30b_a3b_tp2_replica_b] DETACHED: pid=2928258 log=/home/ubuntu/par_ark_workspace/run_state/logs/20_serve_qwen3_30b_a3b_tp2_replica_b.detached.log
+- 2026-05-05T23:03:55Z [20_serve_qwen3_30b_a3b_tp2_replica_b] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/20_serve_qwen3_30b_a3b_tp2_replica_b.log
+- 2026-05-05T23:03:55Z [20_serve_qwen3_30b_a3b_tp2_replica_b] RUNNING: starting TP2 vLLM replica on GPUs 0,3 port 8001
+- 2026-05-05T23:03:56Z [disk] WORKDIR usage 130GB within 700GB budget
+- 2026-05-05T23:03:56Z [20_serve_qwen3_30b_a3b_tp2_replica_b] checkpoint: launching TP2 vLLM replica model=Qwen/Qwen3-30B-A3B-Instruct-2507 CUDA_VISIBLE_DEVICES=0,3 port=8001 max_model_len=32768 gpu_memory_utilization=0.90
+- 2026-05-05T23:04:03Z [20_serve_qwen3_30b_a3b_tp2_replica_b] FAILED: rc=1 log=/home/ubuntu/par_ark_workspace/run_state/logs/20_serve_qwen3_30b_a3b_tp2_replica_b.log
+- 2026-05-05T23:06:29Z [20_serve_qwen3_30b_a3b_tp2_replica_b] FAILED: first attempt on GPUs 0,3 port 8001 exited before model load with OSError address already in use; GPUs 0,3 remained free. Will retry on a clean port.
+- 2026-05-05T23:06:47Z [20_serve_qwen3_30b_a3b_tp2_replica_b_8100] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/20_serve_qwen3_30b_a3b_tp2_replica_b_8100.detached.log
+- 2026-05-05T23:06:47Z [20_serve_qwen3_30b_a3b_tp2_replica_b_8100] DETACHED: pid=2928599 log=/home/ubuntu/par_ark_workspace/run_state/logs/20_serve_qwen3_30b_a3b_tp2_replica_b_8100.detached.log
+- 2026-05-05T23:06:47Z [20_serve_qwen3_30b_a3b_tp2_replica_b_8100] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/20_serve_qwen3_30b_a3b_tp2_replica_b_8100.log
+- 2026-05-05T23:06:47Z [20_serve_qwen3_30b_a3b_tp2_replica_b_8100] RUNNING: starting TP2 vLLM replica on GPUs 0,3 port 8100
+- 2026-05-05T23:06:47Z [disk] WORKDIR usage 130GB within 700GB budget
+- 2026-05-05T23:06:47Z [20_serve_qwen3_30b_a3b_tp2_replica_b_8100] checkpoint: launching TP2 vLLM replica model=Qwen/Qwen3-30B-A3B-Instruct-2507 CUDA_VISIBLE_DEVICES=0,3 port=8100 max_model_len=32768 gpu_memory_utilization=0.90
+- 2026-05-05T23:07:41Z [20_serve_qwen3_30b_a3b_tp2_replica_b_8100] HEALTHY: second TP2 replica running on GPUs 0,3 at http://localhost:8100/v1/models with max_model_len=32768.
+- 2026-05-05T23:07:53Z [18_run_stage_e_30b_subset] ACTION: stopping serial Stage E client before launching two-replica shards; completed prime/off logs will be reused via par_main skip-existing resume.
+- 2026-05-05T23:07:58Z [18_run_stage_e_30b_subset] STOPPED: serial client stopped for two-TP2 shard relaunch.
+- 2026-05-05T23:08:05Z [18_run_stage_e_30b_subset] CLEANUP: stopped stale tail watcher for old serial Stage E log.
+- 2026-05-05T23:08:20Z [18_run_stage_e_30b_subset_shard_a_8000] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_a_8000.detached.log
+- 2026-05-05T23:08:20Z [18_run_stage_e_30b_subset_shard_a_8000] DETACHED: pid=2929224 log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_a_8000.detached.log
+- 2026-05-05T23:08:20Z [18_run_stage_e_30b_subset_shard_a_8000] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_a_8000.log
+- 2026-05-05T23:08:20Z [18_run_stage_e_30b_subset_shard_b_8100] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_b_8100.detached.log
+- 2026-05-05T23:08:20Z [18_run_stage_e_30b_subset_shard_b_8100] DETACHED: pid=2929248 log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_b_8100.detached.log
+- 2026-05-05T23:08:20Z [18_run_stage_e_30b_subset_shard_b_8100] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_b_8100.log
+- 2026-05-05T23:09:26Z [18_run_stage_e_30b_subset_sharded] STABILITY CHECK: shard_a_8000 is resuming prime/off with completed=95/300 errors=0 in the relaunched process; shard_b_8100 is running mag/off with completed=4/300 errors=0. All four L40S GPUs active.
+- 2026-05-05T23:14:14Z [25_run_deadline_e_f_g_supervisor] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/25_run_deadline_e_f_g_supervisor.detached.log
+- 2026-05-05T23:14:14Z [25_run_deadline_e_f_g_supervisor] DETACHED: pid=2930489 log=/home/ubuntu/par_ark_workspace/run_state/logs/25_run_deadline_e_f_g_supervisor.detached.log
+- 2026-05-05T23:14:14Z [25_run_deadline_e_f_g_supervisor] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/25_run_deadline_e_f_g_supervisor.log
+- 2026-05-05T23:14:14Z [25_run_deadline_e_f_g_supervisor] RUNNING: watching Stage E, then launching Stage F shards and Stage G diagnostics
+- 2026-05-05T23:14:14Z [25_run_deadline_e_f_g_supervisor] checkpoint: supervisor started; Stage E target metrics=6 Stage F target metrics=3
+- 2026-05-05T23:14:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage E metrics: 0/6 complete
+- 2026-05-05T23:15:33Z [18_run_stage_e_30b_subset_sharded] STABILITY CHECK: one-minute post-supervisor check shows shard_a prime/off completed=139/300 errors=2; shard_b mag/off completed=40/300 errors=0; both shard statuses RUNNING; supervisor RUNNING; all four GPUs at 100% util.
+- 2026-05-05T23:44:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage E metrics: 0/6 complete
+- 2026-05-06T00:09:41Z [18_run_stage_e_30b_subset_shard_b_8100] SUCCEEDED: log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_b_8100.log
+- 2026-05-06T00:09:41Z [18_run_stage_e_30b_subset_shard_b_8100] checkpoint: completed successfully
+- 2026-05-06T00:14:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage E metrics: 2/6 complete
+- 2026-05-06T00:27:12Z [status_check] Stage E status: metrics=3/6 complete (prime/off, prime/full, mag/off). Active cell mag/full completed=39/300 errors=0 as of log tail; progress JSON slightly earlier showed 37/300. Shard B finished mag/off and second replica is idle; shard A/server A is running remaining cells. GPUs 1,2 active; GPUs 0,3 loaded but idle until supervisor launches Stage F unless workload is manually resharded.
+- 2026-05-06T00:44:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage E metrics: 3/6 complete
+- 2026-05-06T01:14:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage E metrics: 4/6 complete
+- 2026-05-06T01:44:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage E metrics: 4/6 complete
+- 2026-05-06T02:14:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage E metrics: 5/6 complete
+- 2026-05-06T02:23:54Z [18_run_stage_e_30b_subset_shard_a_8000] SUCCEEDED: log=/home/ubuntu/par_ark_workspace/run_state/logs/18_run_stage_e_30b_subset_shard_a_8000.log
+- 2026-05-06T02:23:54Z [18_run_stage_e_30b_subset_shard_a_8000] checkpoint: completed successfully
+- 2026-05-06T02:24:14Z [25_run_deadline_e_f_g_supervisor] checkpoint: Stage E metrics complete: 6/6
+- 2026-05-06T02:24:14Z [25_run_deadline_e_f_g_supervisor] checkpoint: launching Stage F two-replica budget-fix shards
+- 2026-05-06T02:24:14Z [19_run_stage_f_budgetfix_probe_shard_a_8000] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_a_8000.detached.log
+- 2026-05-06T02:24:14Z [19_run_stage_f_budgetfix_probe_shard_a_8000] DETACHED: pid=2936149 log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_a_8000.detached.log
+- 2026-05-06T02:24:14Z [19_run_stage_f_budgetfix_probe_shard_a_8000] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_a_8000.log
+- 2026-05-06T02:24:14Z [19_run_stage_f_budgetfix_probe_shard_b_8100] LAUNCHING: detached log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_b_8100.detached.log
+- 2026-05-06T02:24:14Z [19_run_stage_f_budgetfix_probe_shard_b_8100] DETACHED: pid=2936170 log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_b_8100.detached.log
+- 2026-05-06T02:24:14Z [19_run_stage_f_budgetfix_probe_shard_b_8100] RUNNING: log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_b_8100.log
+- 2026-05-06T02:24:14Z [25_run_deadline_e_f_g_supervisor] waiting for Stage F metrics: 0/3 complete
+- 2026-05-06T02:37:08Z [19_run_stage_f_budgetfix_probe_shard_b_8100] SUCCEEDED: log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_b_8100.log
+- 2026-05-06T02:37:08Z [19_run_stage_f_budgetfix_probe_shard_b_8100] checkpoint: completed successfully
+- 2026-05-06T02:46:45Z [19_run_stage_f_budgetfix_probe_shard_a_8000] SUCCEEDED: log=/home/ubuntu/par_ark_workspace/run_state/logs/19_run_stage_f_budgetfix_probe_shard_a_8000.log
+- 2026-05-06T02:46:45Z [19_run_stage_f_budgetfix_probe_shard_a_8000] checkpoint: completed successfully
+- 2026-05-06T02:49:14Z [25_run_deadline_e_f_g_supervisor] checkpoint: Stage F metrics complete: 3/3
+- 2026-05-06T02:49:14Z [25_run_deadline_e_f_g_supervisor] checkpoint: running Stage G paired diagnostics and regenerating tables
+- 2026-05-06T02:49:15Z [25_run_deadline_e_f_g_supervisor] SUCCEEDED: Stage E/F/G supervisor complete; diagnostics and tables attempted
+- 2026-05-06T02:49:15Z [25_run_deadline_e_f_g_supervisor] checkpoint: completed successfully
+- 2026-05-06T02:49:15Z [25_run_deadline_e_f_g_supervisor] SUCCEEDED: log=/home/ubuntu/par_ark_workspace/run_state/logs/25_run_deadline_e_f_g_supervisor.log
+- 2026-05-06T02:49:15Z [25_run_deadline_e_f_g_supervisor] checkpoint: completed successfully
