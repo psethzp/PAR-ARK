@@ -1,17 +1,20 @@
 # PAR-ARK Results
 
-Updated: 2026-05-05T22:18:27Z
+Updated: 2026-05-06T07:15:00Z
 
 ## Scope
 
-This file records the completed Stage A, Stage B1, and Stage B2 results for the local PAR-ARK workflow.
+This file records the completed end-to-end local PAR-ARK deadline-rescue workflow through Stage G.
 
 - Workspace: `/home/ubuntu/par_ark_workspace`
 - ARK workspace: `/home/ubuntu/par_ark_workspace/ark`
 - Run state/logs: `/home/ubuntu/par_ark_workspace/run_state`
 - Table artifact from B1: `/home/ubuntu/par_ark_workspace/ark/paper_tables/par_ark_tables.md`
-- GPU constraint used: 2 project GPUs max, no CPU offload
-- Current server state after cleanup: no PAR-ARK vLLM server is running; GPUs 1, 2, and 3 are free
+- Final deadline tables: `/home/ubuntu/par_ark_workspace/ark/paper_tables/deadline_all_tables.md`
+- Final paired diagnostics: `/home/ubuntu/par_ark_workspace/ark/paper_tables/{prime,mag,amazon}_deadline_pair_diagnostics.md`
+- GPU constraint used initially: 2 L40S project GPUs, no CPU offload
+- Final acceleration path: two TP2 Qwen3-30B-A3B replicas on 4 L40S GPUs, ports `8000` and `8100`
+- Current server state at final status check: both 30B vLLM servers healthy and loaded, GPUs idle at 0% utilization but holding model memory
 
 ## Stage A: Qwen3-14B Validation Ablation Grid
 
@@ -167,3 +170,231 @@ Operational notes:
 - The complete PAR-ARK `full` mode currently has worse accuracy than `off` on all evaluated graphs in the 30B pilot.
 - Before spending multiple days on full Stage C, the method should be reconsidered or Stage C should be reframed as a diagnostic/negative-result run rather than an expected win.
 - If Stage C is still run unchanged, the highest-value comparison remains `off` vs `full` at `max_steps=16`, because it directly measures the current baseline/control against the complete PAR-ARK intervention.
+
+## Deadline Rescue Pivot
+
+After Stage A/B showed that `full` did not beat `off`, the workflow pivoted from a positive PAR-ARK improvement paper to a failure/diagnostic paper:
+
+**When Adaptive Knowledge-Graph Retrieval Fails: Trace Diagnostics for Local LLM Agents on STaRK**.
+
+The evidence target changed to:
+
+- Stage E: larger Qwen3-30B-A3B `LIMIT=300` off-vs-full test subset.
+- Stage F: budget-fix probe to test whether stricter trace budgets reduce harm.
+- Stage G: paired diagnostics explaining when and how full trace/control fails.
+
+The core paper claim supported by completed results is not that PAR-ARK beats ARK/SOTA. The supported claim is that local adaptive KG retrieval can fail under trace/control-heavy profiles, and that trace statistics reveal mechanisms such as repeated calls and zero-result retrieval.
+
+## Stage E: Qwen3-30B-A3B Main Deadline Subset
+
+Stage E completed successfully in sharded form at `2026-05-06T02:23:54Z`.
+
+Configuration:
+
+- Model: `Qwen/Qwen3-30B-A3B-Instruct-2507`
+- Split: `test`
+- Limit: `300` questions per graph/mode cell
+- Max steps: `16`
+- Graphs: `prime`, `mag`, `amazon`
+- Modes: `off`, `full`
+- Total target workload: `3 graphs x 2 modes x 300 = 1800` question-runs
+- Metrics files produced: `6/6`
+- CPU offload: not used
+- Context length: `32768`
+
+Execution details:
+
+- Initial serial Stage E started at `2026-05-05T22:50:16Z` on the known-working TP2 server at port `8000`.
+- At user request, three idle GPU0 tutor workers were killed and a second TP2 server was prepared.
+- First second-replica attempt failed at `2026-05-05T23:04:03Z` because port `8001` was already in use by an existing vLLM worker side-port.
+- The second replica was relaunched on GPUs `0,3` with port `8100` and became healthy at `2026-05-05T23:07:41Z`.
+- The serial Stage E client was stopped at `2026-05-05T23:07:58Z`; already written question JSONs were retained.
+- Shard A started at `2026-05-05T23:08:20Z` on port `8000` with cells `prime:off prime:full mag:full amazon:off amazon:full`, resuming `prime/off` by skipping existing question logs.
+- Shard B started at `2026-05-05T23:08:20Z` on port `8100` with cell `mag:off`.
+- Shard B completed at `2026-05-06T00:09:41Z`.
+- Shard A completed at `2026-05-06T02:23:54Z`.
+
+Stage E wall-clock notes:
+
+- Initial serial run before sharding: about `18m`.
+- Sharded Stage E after relaunch: about `3h15m`.
+- Overall Stage E elapsed from first launch to final shard completion: about `3h34m`.
+- The two-replica setup materially reduced the projected deadline runtime compared with a serial two-GPU run.
+
+### Stage E Full Table
+
+| Graph | Mode | n | Hit@1 | Hit@5 | R@20 | MRR | TimeMean(s) | StepsMean | Global | Neighbor | Zero | Repeat | Progress caveat |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| prime | off | 290 | 0.2966 | 0.4207 | 0.3681 | 0.3499 | 10.165 | 5.845 | 0.000 | 0.000 | 0.000 | 0.000 | 10/300 errors, 3.3% |
+| prime | full | 300 | 0.2400 | 0.3600 | 0.3297 | 0.2880 | 7.498 | 8.287 | 4.197 | 5.670 | 4.560 | 1.730 | complete |
+| mag | off | 299 | 0.7224 | 0.8328 | 0.7483 | 0.7711 | 12.179 | 4.294 | 0.000 | 0.000 | 0.000 | 0.000 | 1/300 error, 0.3% |
+| mag | full | 300 | 0.4233 | 0.5900 | 0.5006 | 0.4974 | 7.570 | 5.887 | 2.427 | 5.030 | 2.283 | 0.663 | complete |
+| amazon | off | 296 | 0.5439 | 0.7128 | 0.4557 | 0.6152 | 9.846 | 4.240 | 0.000 | 0.000 | 0.000 | 0.000 | 4/300 errors, 1.3% |
+| amazon | full | 300 | 0.5033 | 0.6567 | 0.3607 | 0.5714 | 6.367 | 6.153 | 2.433 | 5.510 | 3.960 | 0.653 | complete |
+
+### Stage E Full Minus Off Deltas
+
+| Graph | Delta Hit@1 | Delta Hit@5 | Delta R@20 | Delta MRR | Delta Time(s) |
+|---|---:|---:|---:|---:|---:|
+| prime | -0.0566 | -0.0607 | -0.0384 | -0.0619 | -2.667 |
+| mag | -0.2991 | -0.2428 | -0.2477 | -0.2737 | -4.609 |
+| amazon | -0.0406 | -0.0561 | -0.0950 | -0.0438 | -3.479 |
+
+### Stage E Takeaways
+
+- The larger `LIMIT=300` subset confirms the pilot pattern: `off` beats `full` on all three graphs by MRR, Hit@5, and R@20.
+- The largest failure remains MAG: `full` loses 0.2737 MRR and 0.2477 R@20 against `off`.
+- `full` is faster per question in all three Stage E cells, but the speed is not enough to compensate for the accuracy loss.
+- `full` creates rich trace telemetry. This is useful for diagnostics, but it does not improve retrieval quality under this configuration.
+- Off-mode context errors are operational caveats, not dominant failures: prime/off 3.3%, mag/off 0.3%, amazon/off 1.3%; all stayed below the 5% stop threshold.
+- Stage E is the central evidence for the failure-mode paper.
+
+## Stage F: Budget-Fix Probe
+
+Stage F completed successfully at `2026-05-06T02:46:45Z`.
+
+Configuration:
+
+- Model: `Qwen/Qwen3-30B-A3B-Instruct-2507`
+- Split: `test`
+- Limit: `150`
+- Mode: `full` only
+- Max steps: `8`
+- Max global searches: `2`
+- Max neighborhood searches: `3`
+- Max observation chars: `2500`
+- Max answers: `10`
+- Graphs: `prime`, `mag`, `amazon`
+- Metrics files produced: `3/3`
+
+Execution details:
+
+- Supervisor launched Stage F after Stage E reached `6/6` metrics.
+- Shard A started at `2026-05-06T02:24:14Z` on port `8000` with graphs `prime amazon`.
+- Shard B started at `2026-05-06T02:24:14Z` on port `8100` with graph `mag`.
+- Shard B completed at `2026-05-06T02:37:08Z`.
+- Shard A completed at `2026-05-06T02:46:45Z`.
+- Stage F sharded elapsed time: about `22m31s`.
+
+### Stage F Budget-Fix Table
+
+| Graph | n | Hit@1 | Hit@5 | R@20 | MRR | TimeMean(s) | StepsMean | Global | Neighbor | Zero | Repeat |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| prime | 150 | 0.1200 | 0.2067 | 0.1857 | 0.1556 | 4.944 | 5.493 | 2.580 | 3.440 | 2.780 | 0.487 |
+| mag | 150 | 0.2800 | 0.4867 | 0.4020 | 0.3727 | 5.091 | 4.860 | 1.847 | 3.793 | 1.587 | 0.133 |
+| amazon | 150 | 0.4133 | 0.5000 | 0.2879 | 0.4511 | 3.932 | 4.927 | 1.807 | 3.347 | 2.227 | 0.193 |
+
+### Stage F Takeaways
+
+- The budget-fix probe reduces repeated calls versus Stage E full-mode telemetry.
+- It also reduces latency substantially.
+- It does not rescue accuracy. On all three graphs, budget-fix MRR is below Stage E full and far below Stage E off.
+- This should be reported as a mitigation/trade-off probe, not as a tuned final method.
+- The paper should phrase Stage F as: stricter budgets reduce some trace pathologies and runtime, but can also truncate useful retrieval depth and further harm accuracy.
+
+## Stage G: Paired Diagnostics And Tables
+
+Stage G completed successfully inside the supervisor at `2026-05-06T02:49:15Z`.
+
+Inputs:
+
+- Stage E off logs for each graph.
+- Stage E full logs for each graph.
+
+Outputs:
+
+- `/home/ubuntu/par_ark_workspace/ark/paper_tables/prime_deadline_pair_diagnostics.md`
+- `/home/ubuntu/par_ark_workspace/ark/paper_tables/prime_deadline_pair_diagnostics.json`
+- `/home/ubuntu/par_ark_workspace/ark/paper_tables/mag_deadline_pair_diagnostics.md`
+- `/home/ubuntu/par_ark_workspace/ark/paper_tables/mag_deadline_pair_diagnostics.json`
+- `/home/ubuntu/par_ark_workspace/ark/paper_tables/amazon_deadline_pair_diagnostics.md`
+- `/home/ubuntu/par_ark_workspace/ark/paper_tables/amazon_deadline_pair_diagnostics.json`
+- `/home/ubuntu/par_ark_workspace/ark/paper_tables/deadline_all_tables.md`
+
+### Stage G Paired Main Metrics
+
+| Graph | paired_n | off MRR | full MRR | Delta MRR | off Hit@5 | full Hit@5 | Delta Hit@5 | off R@20 | full R@20 | Delta R@20 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| prime | 291 | 0.3487 | 0.2834 | -0.0653 | 0.4192 | 0.3540 | -0.0653 | 0.3668 | 0.3247 | -0.0421 |
+| mag | 300 | 0.7686 | 0.4974 | -0.2711 | 0.8300 | 0.5900 | -0.2400 | 0.7458 | 0.5006 | -0.2452 |
+| amazon | 297 | 0.6131 | 0.5705 | -0.0426 | 0.7104 | 0.6566 | -0.0539 | 0.4542 | 0.3631 | -0.0911 |
+
+### Stage G Win/Tie/Loss
+
+| Graph | MRR wins | MRR ties | MRR losses | Hit@1 wins | Hit@1 ties | Hit@1 losses |
+|---|---:|---:|---:|---:|---:|---:|
+| prime | 38 | 192 | 61 | 21 | 232 | 38 |
+| mag | 29 | 138 | 133 | 21 | 169 | 110 |
+| amazon | 43 | 190 | 64 | 25 | 235 | 37 |
+
+### Stage G Trace Mechanism Notes
+
+| Graph | Global | Neighbor | Zero-result | Repeated | Events | Steps | Time(s) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| prime | 4.1478 | 5.7010 | 4.6151 | 1.6564 | 11.8179 | 8.2577 | 7.4768 |
+| mag | 2.4133 | 5.0200 | 2.2767 | 0.6633 | 9.8333 | 5.8667 | 7.5468 |
+| amazon | 2.4040 | 5.4815 | 3.9293 | 0.6364 | 10.3131 | 6.1111 | 6.3344 |
+
+Conditional diagnostic highlights:
+
+- PRIME repeated calls are strongly associated with worse full-minus-off MRR: repeat=0 mean delta `-0.0023`, repeat>=1 mean delta `-0.1228`.
+- PRIME zero-result events also separate behavior: zero=0 mean delta `+0.0380`, zero>=1 mean delta `-0.0776`.
+- MAG repeated calls are especially damaging: repeat=0 mean delta `-0.2292`, repeat>=1 mean delta `-0.3826`.
+- MAG zero-result events are also worse: zero=0 mean delta `-0.1951`, zero>=1 mean delta `-0.3075`.
+- AMAZON has a more nuanced zero-result pattern, but `full` still loses overall; repeat>=1 is slightly worse than repeat=0.
+
+Oracle/fusion caveat:
+
+- Diagnostics include oracle upper bounds and exploratory fusion sweeps.
+- These are diagnostic only. They must not be reported as deployable methods unless a routing/fusion rule is fixed on validation and then evaluated on held-out test.
+
+## End-To-End Status After Stage G
+
+Completed:
+
+- Stage 0/preflight/server setup.
+- Stage A validation grid.
+- Stage B1 table collection and selection.
+- Stage B2 30B pilot.
+- Stage E deadline subset.
+- Stage F budget-fix probe.
+- Stage G paired diagnostics and regenerated summary tables.
+
+Not run by design:
+
+- Full multi-day Stage C.
+- Stage D reranking.
+- Any CPU-offloaded run.
+
+Failed or interrupted experiments preserved:
+
+- `20_serve_qwen3_30b_a3b_tp2_replica_b` failed on port `8001` because the existing vLLM worker owned `*:8001`; the successful retry used port `8100`.
+- `18_run_stage_e_30b_subset` serial client was intentionally stopped after partial progress to relaunch with two TP2 shards. Its partial question logs were reused by skip-existing resume.
+- Context-window errors were recorded in Stage A, Stage B2, and Stage E. These were handled by the runner and preserved in logs/progress; all Stage E off-cell error rates stayed under the operational 5% stop threshold.
+
+Final paper-level takeaway:
+
+- The completed evidence supports a diagnostic failure-mode paper, not a SOTA/improvement paper.
+- Across Qwen3-14B validation, Qwen3-30B pilot, and Qwen3-30B `LIMIT=300` subset, `off` consistently beats `full`.
+- Full trace/control creates interpretable telemetry and exposes failure mechanisms, but it does not improve retrieval in the completed local setup.
+- Budget fixing reduces trace cost and repeated-call rates but does not repair accuracy.
+
+## Results Bundle
+
+An exhaustive local results bundle was created after documentation updates:
+
+- Folder: `/home/ubuntu/nachiket/Ablations/PStuff/PAR-ARK/results/par_ark_deadline_results_2026_05_06_0715`
+- Zip archive: `/home/ubuntu/nachiket/Ablations/PStuff/PAR-ARK/results/par_ark_deadline_results_2026_05_06_0715.zip`
+- Zip verification: `unzip -tq` passed with no compressed-data errors.
+- Approximate zip size: `28 MB`
+
+Bundle contents include:
+
+- Updated `RUNBOOK.md`, updated `RESULTS.md`, Stage B summary, rescue plan, README, and paper outline.
+- All paper tables and paired diagnostics.
+- Generated CSV/JSON summaries for metrics and progress files.
+- Raw experiment artifacts copied from `/home/ubuntu/par_ark_workspace/ark/data/experiments`, including per-question trace/result JSONs.
+- Detached run logs, status files, heartbeats, env snapshots, PID files, command wrappers, and checkpoints from `/home/ubuntu/par_ark_workspace/run_state`.
+- Repo runtime scripts and the full deadline rescue package.
+- Final server health snapshots for vLLM ports `8000` and `8100`.
+- Manifest and SHA256 checksums.

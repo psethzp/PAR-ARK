@@ -413,3 +413,11 @@ B2 takeaway: the 30B pilot repeated the Stage A pattern. `off` beat `full` on ev
 - 2026-05-06T02:49:15Z [25_run_deadline_e_f_g_supervisor] checkpoint: completed successfully
 - 2026-05-06T02:49:15Z [25_run_deadline_e_f_g_supervisor] SUCCEEDED: log=/home/ubuntu/par_ark_workspace/run_state/logs/25_run_deadline_e_f_g_supervisor.log
 - 2026-05-06T02:49:15Z [25_run_deadline_e_f_g_supervisor] checkpoint: completed successfully
+- 2026-05-06T07:15:00Z [final_status] Stage E complete: 6/6 metrics. Completed cells: prime/off, prime/full, mag/off, mag/full, amazon/off, amazon/full.
+- 2026-05-06T07:15:00Z [final_status] Stage F complete: 3/3 metrics. Completed cells: prime/full budgetfix, mag/full budgetfix, amazon/full budgetfix.
+- 2026-05-06T07:15:00Z [final_status] Stage G complete: paired diagnostics and JSON summaries written for prime, mag, amazon; deadline_all_tables.md regenerated.
+- 2026-05-06T07:15:00Z [final_status] Main caveats: Stage E off-cell context/error counts were prime 10/300, mag 1/300, amazon 4/300; all below 5% stop threshold. Full cells completed 300/300. First second-replica attempt on port 8001 failed with address-in-use; successful retry used port 8100. Serial Stage E client was intentionally stopped and relaunched as resumable shards.
+- 2026-05-06T07:15:00Z [final_status] Evidence direction: results support a failure/diagnostic paper. Qwen3-30B Stage E full underperforms off on all graphs by MRR, Hit@5, and R@20; Stage F reduces trace budgets/runtime but does not restore accuracy.
+- 2026-05-06T07:15:00Z [documentation] RESULTS.md updated through Stage G with Stage E/F/G metrics, paired diagnostics, operational caveats, failed attempts, and takeaways.
+- 2026-05-06T08:53:00Z [results_bundle] Created exhaustive results folder at /home/ubuntu/nachiket/Ablations/PStuff/PAR-ARK/results/par_ark_deadline_results_2026_05_06_0715 with updated docs, paper tables, diagnostics, summaries, raw experiment traces, run_state logs/status/checkpoints, scripts, rescue package, server health snapshots, manifest, and checksums.
+- 2026-05-06T08:53:00Z [results_bundle] Created zip archive /home/ubuntu/nachiket/Ablations/PStuff/PAR-ARK/results/par_ark_deadline_results_2026_05_06_0715.zip and verified it with unzip -tq; archive size is about 28 MB.
